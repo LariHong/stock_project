@@ -8,3 +8,5 @@ matplotlib
 seaborn
 yfinance
 scikit-learn
+tensorflow
+statsmodels
