@@ -12,14 +12,15 @@ def Check_Data_Csv():
     else:
         return False
 
-def Get_N_Month_Data(stock_id:int,start_year:str, start_month:str, end_year:str, end_month:str) ->pd.DataFrame:
-    ticker = f'{stock_id}.TW'
+def Get_N_Month_Data(stock_id:str,start_year:str, start_month:str, end_year:str, end_month:str) ->pd.DataFrame:
+    ticker = f'{stock_id}'
     start_date = f'{start_year}-{start_month}-01'
     end_date = pd.to_datetime(f'{end_year}-{end_month}-01') + pd.offsets.MonthEnd(0)
     end_date = end_date.strftime('%Y-%m-%d')
     data = yf.download(ticker, start=start_date, end=end_date)
     data = data.reset_index()
 
+    print(data)
     return data
     
 def Get_Data_Dict(data:pd.DataFrame)->dict:

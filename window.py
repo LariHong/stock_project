@@ -376,12 +376,12 @@ class App(ThemedTk):
         top_window = tk.Toplevel(self)
         top_window.title("訓練模型")
         top_window.geometry("600x500")
-        regression_model=['決策樹(R)','Linear_regression','C']
+        regression_model=['決策樹(R)','Linear_regression']
         button_frame=ttk.Frame(top_window)
         button_frame.pack()
         radio_regression = ttk.Radiobutton(button_frame, text="Regression", value="Regression",command=lambda:self.model_combobox(button_frame,regression_model,data))
         radio_regression.grid(row=0, column=0, sticky="w")
-        classification_model=['決策樹(C)','Logisticregression','G']
+        classification_model=['決策樹(C)','Logisticregression']
         radio_classification = ttk.Radiobutton(button_frame, text="Classification", value="Classification",command=lambda:self.model_combobox(button_frame,classification_model,data))
         radio_classification.grid(row=0, column=1, sticky="w")
         self.result_frame=ttk.Frame(top_window)

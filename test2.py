@@ -103,42 +103,59 @@ def Decision_tree_graph():
     plt.show()
 
 def Linear_regression():
+    # 創建目標變量
     tdf = pd.DataFrame()
     tdf['Target'] = data['Close']
 
-    f =['Open','High','Low','Adj Close','EMA12']
-    x = data[f].values  # 排除第一列（日期）和最后两列（Target和Close）
-    y = tdf['Target'].values  # 使用 'Target' 作为目标变量
+    # 選擇特徵
+    f = ['Open', 'High', 'Low', 'Adj Close', 'EMA12']
+    x = data[f].values
+    y = tdf['Target'].values
 
-    x = data.iloc[:, 1:-1].values  # 假設需要排除第一列（日期）和最後兩列（Target和Close）
-    y = tdf['Target'].values  # 使用 'Target' 作為目標變量
+    # 分割資料集為訓練集、驗證集和測試集
+    x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.4, random_state=39830)
+    x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.5, random_state=39830)
 
-    x_train, x_test, y_train, y_test = train_test_split(
-    x, y, test_size=0.4,random_state=39830)
+    # 標準化特徵和目標變量
     std_x = StandardScaler()
     x_train = std_x.fit_transform(x_train)
+    x_val = std_x.transform(x_val)
     x_test = std_x.transform(x_test)
+
     std_y = StandardScaler()
     y_train = std_y.fit_transform(y_train.reshape(-1, 1))
+    y_val = std_y.transform(y_val.reshape(-1, 1))
     y_test = std_y.transform(y_test.reshape(-1, 1))
+
+    # 訓練線性回歸模型
     lr = LinearRegression()
     lr.fit(x_train, y_train)
     print('權重值：{}'.format(lr.coef_))
     print('偏置值：{}'.format(lr.intercept_))
 
+    # 在測試集上進行預測
     y_predict = std_y.inverse_transform(lr.predict(x_test))
     y_real = std_y.inverse_transform(y_test)
+
     for i in range(50):
         print('預測值：{}，真實值：{}'.format(y_predict[i], y_real[i]))
 
+    # 計算平均方差
     merror = mean_squared_error(y_real, y_predict)
     print('平均方差：{}'.format(merror))
 
-    x_last_predict = x[-10].reshape(1, -1)
-    
+    # 使用最新資料進行預測
+    x_last_predict = x[-1].reshape(1, -1)
     y_last_predict = std_y.inverse_transform(lr.predict(std_x.transform(x_last_predict)))
     print('預測值：', y_last_predict[0].round(4))
-    print(type(x_last_predict))
+
+    # 在驗證集上進行評估
+    y_val_predict = std_y.inverse_transform(lr.predict(x_val))
+    y_val_real = std_y.inverse_transform(y_val)
+    val_merror = mean_squared_error(y_val_real, y_val_predict)
+    print('驗證集平均方差：{}'.format(val_merror))
+
+    return merror, y_last_predict[0], val_merror
 
 def DR_Linear_regression():
     tdf= pd.DataFrame()
@@ -573,58 +590,77 @@ def svr_and_pca2():
 
 
 def Decision_tree_Classifier():
-    
+    # 創建目標變量
     tdf = pd.DataFrame()
     tdf['Target'] = np.where(data['Close'].shift(-1) > data['Close'], 'Buy', 'Sell')
+
+    # 選擇特徵
     feature = ['Open', 'High', 'Low', 'Adj Close', 'EMA12']
-    x = data[feature].values  # 排除第一列（日期）和最后两列（Target和Close）
-    y = tdf['Target'].values  # 使用 'Target' 作为目标变量
+    x = data[feature].values  # 排除第一列（日期）和最後兩列（Target和Close）
+    y = tdf['Target'].values  # 使用 'Target' 作為目標變量
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4, random_state=39830)
+    # 分割資料集為訓練集、驗證集和測試集
+    x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.4, random_state=39830)
+    x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.5, random_state=39830)
 
+    # 訓練決策樹分類器
     dec = DecisionTreeClassifier(random_state=39830)
     dec.fit(x_train, y_train)
 
+    # 使用最新資料進行預測
     x_last_predict = data.iloc[-1][feature].values.reshape(1, -1)
     y_model_pred = dec.predict(x_last_predict)
+
+    # 評估模型
     score = dec.score(x_test, y_test)
-    y_pred=dec.predict(x_test)
+    y_pred = dec.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)
 
-    conf_matrix = confusion_matrix(y_test, y_pred, labels=dec.classes_)
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Reds', xticklabels=dec.classes_, yticklabels=dec.classes_)
-    plt.xlabel('Predicted Label')
-    plt.ylabel('True Label')
-    plt.title('Confusion Matrix')
-    plt.show()
+    # # 計算混淆矩陣並繪製熱力圖
+    # conf_matrix = confusion_matrix(y_test, y_pred, labels=dec.classes_)
+    # plt.figure(figsize=(10, 7))
+    # sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Reds', xticklabels=dec.classes_, yticklabels=dec.classes_)
+    # plt.xlabel('Predicted Label')
+    # plt.ylabel('True Label')
+    # plt.title('Confusion Matrix')
+    # plt.show()
 
-    # 计算准确率
-    accuracy = accuracy_score(y_test, y_pred)
-    # 计算精确率
+    # 計算其他評估指標
     precision = precision_score(y_test, y_pred, average='weighted', labels=dec.classes_)
-    # 计算召回率
     recall = recall_score(y_test, y_pred, average='weighted', labels=dec.classes_)
-    # 计算 F1 分数
     f1 = f1_score(y_test, y_pred, average='weighted', labels=dec.classes_)
 
-    print(score)
-    print(accuracy)
+    # 在驗證集上進行評估
+    val_score = dec.score(x_val, y_val)
+    y_val_pred = dec.predict(x_val)
+    val_accuracy = accuracy_score(y_val, y_val_pred)
+    val_precision = precision_score(y_val, y_val_pred, average='weighted', labels=dec.classes_)
+    val_recall = recall_score(y_val, y_val_pred, average='weighted', labels=dec.classes_)
+    val_f1 = f1_score(y_val, y_val_pred, average='weighted', labels=dec.classes_)
 
-    return score,y_model_pred[0],f1
+    # 輸出評估結果
+    print("Test Score:", score)
+    print("Test Accuracy:", accuracy)
+    print("Validation Score:", val_score)
+    print("Validation Accuracy:", val_accuracy)
+    print("Test F1 Score:", f1)
+    print("Validation F1 Score:", val_f1)
 
+    return score, y_model_pred[0], f1, val_score, val_f1
+
+# Decision_tree_Classifier()
 # pca_feature_selection()
 # KNeighbors()
 # GridSearch()
 # Decision_tree(39830)
-# Linear_regression()
+Linear_regression()
 # pca_feature_selection()
 # DR_Linear_regression()
 # Logisticregression()
 # classificationreport()
 # svc()
 # svcandpca()
-svr_and_pca2()
+# svr_and_pca2()
 # svr_and_pca_with_cv()
 # svm()
 # svr()

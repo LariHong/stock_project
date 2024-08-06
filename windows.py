@@ -1,7 +1,7 @@
 #自定義 套件
 import data_loading as rdata
-import datas
-from datas import Data
+import data
+from data import Data
 import features
 from features.feature import Feature
 #python 套件
@@ -149,22 +149,21 @@ class Window(ThemedTk):
                 self.end_month_combobox.set("月份")
 
     def update_stock_id(self):
-        try:
-            self._stock_id = int(self.stock_id_var.get())
-            start_year = self.start_year_combobox.get()
-            start_month = self.start_month_combobox.get()
-            end_year = self.end_year_combobox.get()
-            end_month = self.end_month_combobox.get()
+        
+        self._stock_id = self.stock_id_var.get()
+        start_year = self.start_year_combobox.get()
+        start_month = self.start_month_combobox.get()
+        end_year = self.end_year_combobox.get()
+        end_month = self.end_month_combobox.get()
 
-            if (start_year == "年份(西元)" or start_month == "月份" or
-                end_year == "年份(西元)" or end_month == "月份"):
-                messagebox.showinfo("Input Error", "Please select both start and end dates.")
-            else:
-                self.clean_right()
-                self.main(start_year, start_month, end_year, end_month)
+        if (start_year == "年份(西元)" or start_month == "月份" or
+            end_year == "年份(西元)" or end_month == "月份"):
+            messagebox.showinfo("Input Error", "Please select both start and end dates.")
+        else:
+            self.clean_right()
+            self.main(start_year, start_month, end_year, end_month)
 
-        except ValueError:
-            print("Invalid stock ID input")
+        
 
     def main(self,start_year, start_month, end_year, end_month):
         stock_id=self.stock_id
